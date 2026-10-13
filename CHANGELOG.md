@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-13
+
 ### Added
 
 - `tracecost cost FILES…`: prices every LLM call in OTLP JSON/JSONL, Phoenix spans JSONL or
@@ -32,4 +34,5 @@ All notable changes to this project are documented here. The format follows
 - Examples reproducing langfuse#16077, langfuse#13780, phoenix#13655, mlflow#22745 /
   ollama#15758 and phoenix discussion 14736, plus a reproducible demo export.
 
-[Unreleased]: https://github.com/thanatchon36/tracecost/compare/main...HEAD
+[Unreleased]: https://github.com/thanatchon36/tracecost/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/thanatchon36/tracecost/releases/tag/v0.1.0

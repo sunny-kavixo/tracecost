@@ -2,7 +2,7 @@
 
 > Recompute what your LLM traces cost, offline, from an OTLP, Langfuse or Phoenix export, with cache and reasoning tokens priced, and see where your observability tool's totals disagree.
 
-Status: in development (v0.1.0 target)
+Status: v0.1.0 shipped 2026-10-13 ([release](https://github.com/thanatchon36/tracecost/releases/tag/v0.1.0), [PyPI](https://pypi.org/project/tracecost/))
 
 ## Problem
 
