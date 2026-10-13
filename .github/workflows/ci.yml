@@ -48,7 +48,7 @@ jobs:
       id-token: write  # codecov tokenless upload via OIDC
 
   example:
-    # Runs the README example as a user would. Replace with the project's real 10-line demo.
+    # Runs the README demo and the issue-named examples as a user would.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -58,9 +58,13 @@ jobs:
       - run: uv sync --locked
       - name: README demo output still matches
         run: |
-          HOME="$(mktemp -d)" uv run upfront examples/demo --yes --top 2 | tee out.txt
-          grep -F "claude-code                                      ≈ 6,786  before your first prompt" out.txt
-          grep -F "mcp filesystem (14 tools, project)             ≈ 2,751" out.txt
-          grep -F "[openai-tool-name]" out.txt
+          uv run tracecost cost examples/demo/traces.jsonl --by trace | tee out.txt
+          grep -F "12 generations · 6 traces" out.txt
+          grep -F "total                                    12     207,000     126,000    11,400     \$0.3131" out.txt
+          grep -F "'acme-support-7b' has no price" out.txt
+      - name: Demo export is reproducible
+        run: |
+          uv run python examples/demo/make_demo.py /tmp/traces.jsonl
+          cmp /tmp/traces.jsonl examples/demo/traces.jsonl
       - name: Examples named after the issues still run
-        run: for f in examples/*.py; do uv run python "$f"; done
+        run: for f in examples/*.py; do case "$f" in examples/_*) ;; *) uv run python "$f" ;; esac; done
