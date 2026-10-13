@@ -31,24 +31,28 @@ class Warnings:
     def lines(self) -> list[str]:
         out: list[str] = []
         for model, n in self.unknown_models.most_common():
+            verb = "has" if n == 1 else "have"
             out.append(
-                f"{n} generation{'s' if n != 1 else ''} on model {model!r} have no price "
+                f"{_plural(n, 'generation')} on model {model!r} {verb} no price "
                 "(counted as $0). Add it with --prices."
             )
         if self.no_model:
-            out.append(f"{self.no_model} generations have no model name and were not priced.")
+            out.append(f"{_plural(self.no_model, 'generation')} without a model name; not priced.")
         for provider, n in self.cache_unreported.most_common():
+            verb = "reports" if n == 1 else "report"
             out.append(
-                f"{n} generation{'s' if n != 1 else ''} from {provider} report no cache "
-                "attributes although the model bills cached tokens; zero cache may mean "
-                "'not reported' (ollama#15758). Verify the exporter."
+                f"{_plural(n, 'generation')} from {provider} {verb} no cache attributes "
+                "although the model bills cached tokens; zero cache may mean 'not reported' "
+                "(ollama#15758). Verify the exporter."
             )
         if self.supplied:
             sources = ", ".join(f"{s} ({n})" for s, n in self.supplied.most_common())
+            n = sum(self.supplied.values())
+            verb = "uses" if n == 1 else "use"
             out.append(
-                f"{sum(self.supplied.values())} generations use a supplied cost "
-                f"[{sources}] totalling ${self.supplied_total:,.4f}; the token table says "
-                f"${self.recomputed_total:,.4f}. Use --recompute to price from tokens."
+                f"{_plural(n, 'generation')} {verb} a supplied cost [{sources}] totalling "
+                f"${self.supplied_total:,.4f}; the token table says ${self.recomputed_total:,.4f}. "
+                "Use --recompute to price from tokens."
             )
         for note, n in self.notes.most_common():
             out.append(f"{note} (x{n})" if n > 1 else note)
@@ -101,12 +105,16 @@ def _trunc(text: str, width: int = KEY_WIDTH) -> str:
     return text if len(text) <= width else text[: width - 1] + "…"
 
 
+def _plural(n: int, noun: str) -> str:
+    return f"{n} {noun}" if n == 1 else f"{n} {noun}s"
+
+
 def _label(row: Row, dimension: str) -> str:
     if dimension == "root":
         trace, _, span = row.key.partition("/")
-        return f"{row.name or span} {trace[:8]}…" if trace else row.key
+        return f"{row.name or span} …{trace[-6:]}" if trace else row.key
     if dimension == "trace":
-        return f"{row.name} {row.key[:8]}…" if row.name else row.key
+        return f"{row.name} …{row.key[-6:]}" if row.name else row.key
     if dimension == "model" and row.name:
         return f"{row.key} ({row.name})"
     return row.key

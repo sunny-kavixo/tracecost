@@ -204,10 +204,17 @@ def resolve_rates(
         if hit is not None:
             rates.update(hit.get("prices") or {})
         elif service_tier.lower() != "default":
-            notes.append(
-                f"service tier '{service_tier}' not in the price table for {model['id']}; "
-                "default rates used"
-            )
+            known = {str((v.get("when") or {}).get("service_tier", "")).lower() for v in variants}
+            if service_tier.lower() in known:
+                notes.append(
+                    f"service tier '{service_tier}' for {model['id']} is not in force on "
+                    f"{at.date().isoformat()}; default rates used"
+                )
+            else:
+                notes.append(
+                    f"service tier '{service_tier}' not in the price table for {model['id']}; "
+                    "default rates used"
+                )
     return rates, notes
 
 
