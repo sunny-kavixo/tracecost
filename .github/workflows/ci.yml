@@ -1,0 +1,66 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - run: uv sync --locked --all-extras --dev
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy --strict src
+      - run: uv run python scripts/gen_api_docs.py --check
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv sync --locked --all-extras --dev
+      - run: uv run pytest --cov --cov-report=xml --cov-fail-under=85
+      - if: matrix.os == 'ubuntu-latest' && matrix.python == '3.13'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          use_oidc: true
+          fail_ci_if_error: false
+    permissions:
+      contents: read
+      id-token: write  # codecov tokenless upload via OIDC
+
+  example:
+    # Runs the README example as a user would. Replace with the project's real 10-line demo.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - run: uv sync --locked
+      - name: README demo output still matches
+        run: |
+          HOME="$(mktemp -d)" uv run upfront examples/demo --yes --top 2 | tee out.txt
+          grep -F "claude-code                                      ≈ 6,786  before your first prompt" out.txt
+          grep -F "mcp filesystem (14 tools, project)             ≈ 2,751" out.txt
+          grep -F "[openai-tool-name]" out.txt
+      - name: Examples named after the issues still run
+        run: for f in examples/*.py; do uv run python "$f"; done
