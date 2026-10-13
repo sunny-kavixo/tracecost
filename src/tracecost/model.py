@@ -105,8 +105,11 @@ class Export:
     spans: list[Span] = field(default_factory=list)
     generations: list[Generation] = field(default_factory=list)
     sources: list[str] = field(default_factory=list)
+    # trace id -> (session id, user id) from trace-level records (Langfuse traces export)
+    trace_meta: dict[str, tuple[str | None, str | None]] = field(default_factory=dict)
 
     def extend(self, other: Export) -> None:
         self.spans.extend(other.spans)
         self.generations.extend(other.generations)
         self.sources.extend(other.sources)
+        self.trace_meta.update(other.trace_meta)
