@@ -14,9 +14,9 @@ import json
 from pathlib import Path
 
 import pytest
-from tracecost.prices import PriceTable, price_generation
 
 from tracecost import Generation, Usage
+from tracecost.prices import PriceTable, price_generation
 
 SMALL_TABLE = {
     "snapshot_date": "2026-10-01",
