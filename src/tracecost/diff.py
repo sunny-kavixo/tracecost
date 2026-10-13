@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from tracecost.model import Usage
 from tracecost.rollup import Rollup, Row
 
 
@@ -98,4 +97,4 @@ def diff(a: Rollup, b: Rollup) -> Diff:
     return Diff(total=total, rows=rows, models=models)
 
 
-__all__ = ["Diff", "DiffRow", "Usage", "diff"]
+__all__ = ["Diff", "DiffRow", "diff"]

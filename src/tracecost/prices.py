@@ -133,7 +133,9 @@ class PriceTable:
                 by_id[pid] = merged
             else:
                 by_id = {pid: dict(p), **by_id}  # new providers are consulted first
-        return replace(self, providers=tuple(by_id.values()), source=f"{self.source}+{path}")
+        return replace(
+            self, providers=tuple(by_id.values()), source=f"{self.source}+{Path(path).name}"
+        )
 
     @property
     def model_count(self) -> int:
