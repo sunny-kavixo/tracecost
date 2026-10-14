@@ -2,8 +2,8 @@
 
 [![ci](https://github.com/thanatchon36/tracecost/actions/workflows/ci.yml/badge.svg)](https://github.com/thanatchon36/tracecost/actions/workflows/ci.yml)
 [![coverage](https://codecov.io/gh/thanatchon36/tracecost/graph/badge.svg)](https://codecov.io/gh/thanatchon36/tracecost)
-[![PyPI](https://img.shields.io/pypi/v/tracecost)](https://pypi.org/project/tracecost/)
-[![Python](https://img.shields.io/pypi/pyversions/tracecost)](https://pypi.org/project/tracecost/)
+[![PyPI](https://img.shields.io/pypi/v/tracecost?v=1)](https://pypi.org/project/tracecost/)
+[![Python](https://img.shields.io/pypi/pyversions/tracecost?v=1)](https://pypi.org/project/tracecost/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/thanatchon36/tracecost/blob/main/LICENSE)
 
 Recompute what your LLM traces cost, offline, from an OpenTelemetry, Langfuse or Phoenix
