@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+- Read gzip-compressed OTLP and Langfuse JSON/JSONL exports, including files detected by gzip magic bytes.
+
 ## [0.1.0] - 2026-10-13
 
 ### Added

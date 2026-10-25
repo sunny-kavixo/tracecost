@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import json
 from pathlib import Path
 
@@ -127,6 +128,64 @@ def test_empty_file_and_bad_jsonl_line(tmp_path: Path) -> None:
     bad.write_text('{"resourceSpans": []}\n{oops\n')
     with pytest.raises(ValueError, match="line 2"):
         load(bad)
+
+
+def test_gzip_otlp_matches_uncompressed_with_suffix_and_magic(tmp_path: Path) -> None:
+    doc = export_request(
+        {
+            "traceId": TRACE,
+            "spanId": "0000000000000001",
+            "name": "chat",
+            "attributes": [
+                attr("gen_ai.request.model", "gpt-4o"),
+                attr("gen_ai.usage.input_tokens", 10),
+                attr("gen_ai.usage.output_tokens", 2),
+            ],
+        }
+    )
+    payload = json.dumps(doc)
+    plain = tmp_path / "traces.json"
+    plain.write_text(payload, encoding="utf-8")
+    with_suffix = tmp_path / "traces.json.gz"
+    without_suffix = tmp_path / "traces-compressed.json"
+    for path in (with_suffix, without_suffix):
+        with gzip.open(path, "wt", encoding="utf-8") as handle:
+            handle.write(payload)
+
+    expected = load(plain)
+    for compressed in (with_suffix, without_suffix):
+        got = load(compressed)
+        assert got.spans == expected.spans
+        assert got.generations == expected.generations
+        assert got.trace_meta == expected.trace_meta
+
+
+def test_gzip_langfuse_matches_uncompressed(tmp_path: Path) -> None:
+    payload = json.dumps(
+        {
+            "data": [
+                {
+                    "id": "generation-1",
+                    "traceId": "trace-1",
+                    "type": "GENERATION",
+                    "name": "chat",
+                    "model": "gpt-4o",
+                    "usageDetails": {"input": 3, "output": 2},
+                }
+            ]
+        }
+    )
+    plain = tmp_path / "langfuse.json"
+    plain.write_text(payload, encoding="utf-8")
+    compressed = tmp_path / "langfuse.json.gz"
+    with gzip.open(compressed, "wt", encoding="utf-8") as handle:
+        handle.write(payload)
+
+    expected = load(plain)
+    got = load(compressed)
+    assert got.spans == expected.spans
+    assert got.generations == expected.generations
+    assert got.trace_meta == expected.trace_meta
 
 
 def test_missing_file_names_the_path(tmp_path: Path) -> None:

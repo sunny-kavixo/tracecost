@@ -10,6 +10,7 @@ Attribute dialects (OTel GenAI, OpenInference) are tables in :mod:`tracecost.rea
 
 from __future__ import annotations
 
+import gzip
 import json
 from collections.abc import Iterable, Iterator
 from pathlib import Path
@@ -27,7 +28,13 @@ def looks_like_otlp(doc: object) -> bool:
 
 def parse_documents(path: Path) -> list[Any]:
     """Return the JSON documents in *path*: one, an array of them, or one per line."""
-    text = path.read_text(encoding="utf-8")
+    with path.open("rb") as raw:
+        compressed = raw.read(2) == b"\x1f\x8b"
+    if path.suffix.lower() == ".gz" or compressed:
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            text = handle.read()
+    else:
+        text = path.read_text(encoding="utf-8")
     stripped = text.strip()
     if not stripped:
         return []
